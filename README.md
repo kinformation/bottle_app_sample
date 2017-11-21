@@ -39,6 +39,12 @@ sqlite> PRAGMA TABLE_INFO(temper);
 sqlite> .exit
 ```
 
+# メインページ機能
+
+* プロットデータ自動更新
+* 描画範囲(X軸)指定
+* 上限、下限アラートログ出力
+
 # ライブラリ一覧
 
 * [jQuery](https://jquery.com/)(v1.9.1)
