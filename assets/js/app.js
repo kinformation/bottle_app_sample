@@ -168,12 +168,12 @@ $(function() {
 
             // グラフ更新
             var new_data = ajaxDataRenderer();
-            if (document.getElementById('jp_chart') != null) {
+            if ($('#jp_chart')[0]) {
                 var opts = jp_options;
                 opts.data = new_data;
                 opts.clear = true;
                 jqplot.replot(opts);
-            } else if (document.getElementById('hc_chart') != null) {
+            } else if ($('#hc_chart')[0]) {
                 var opts = hc_options;
                 highcharts.destroy()
                 opts.series[0].data = new_data[0];
@@ -196,18 +196,32 @@ $(function() {
     // ======================
     $('#start').change(function() {
         var unix_time = str2unixtime($('#start').val());
-        var opts = jp_options;
-        opts.axes.xaxis.min = unix_time;
-        jqplot.replot(opts);
+        if ($('#jp_chart')[0]) {
+            var opts = jp_options;
+            opts.axes.xaxis.min = unix_time;
+            jqplot.replot(opts);
+        } else if ($('#hc_chart')[0]) {
+            var opts = hc_options;
+            opts.xAxis.min = unix_time;
+            highcharts.destroy()
+            highcharts = Highcharts.chart('hc_chart', opts);
+        }
         log(logger.INFO, 'グラフの開始時刻を変更しました。');
         log(logger.DEBUG, '日時 = ' + $('#start').val());
     });
 
     $('#end').change(function() {
-        unix_time = str2unixtime($('#end').val());
-        var opts = jp_options;
-        opts.axes.xaxis.max = unix_time;
-        jqplot.replot(opts);
+        var unix_time = str2unixtime($('#end').val());
+        if ($('#jp_chart')[0]) {
+            var opts = jp_options;
+            opts.axes.xaxis.max = unix_time;
+            jqplot.replot(opts);
+        } else if ($('#hc_chart')[0]) {
+            var opts = hc_options;
+            opts.xAxis.max = unix_time;
+            highcharts.destroy()
+            highcharts = Highcharts.chart('hc_chart', opts);
+        }
         log(logger.INFO, 'グラフの終了時刻を変更しました。');
         log(logger.DEBUG, '日時 = ' + $('#end').val());
     });
