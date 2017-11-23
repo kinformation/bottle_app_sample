@@ -26,8 +26,8 @@ http://<サーバIPアドレス>:8000/
   - `@パラメタなし`: ランダム値(0.0～40.0)を現在時刻の気温としてDB登録
 * `/edit_config` : 設定編集画面
 * `/config` :
-  - `GET`: 設定ファイルの中身を返す
-  - `POST`: 編集画面の情報をJSON形式で設定ファイルに保存
+  - `@GET`: 設定ファイルの中身を返す
+  - `@POST`: 編集画面の情報をJSON形式で設定ファイルに保存
 * `/js`: 静的javasctipt
 * `/lib`: 静的ライブラリ(JS,CSS)
 
@@ -58,7 +58,7 @@ sqlite> .exit
 
 # 設定ファイル(app.conf)
 
-``` json
+``` javascript
 {
   "log_level": "1",     // ログレベル
   "interval_sec": "10", // 更新間隔（秒）
