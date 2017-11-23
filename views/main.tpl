@@ -12,9 +12,9 @@
         </div>
     </form>
     %if get('type') == 'jqplot':
-        <div id='jp_chart' style='height: 200px;'></div>
+        <div id="jp_chart" style="height: 200px;"></div>
     %elif get('type') == 'highcharts':
-        <div id="hc_chart" style='height: 200px;'></div>
+        <div id="hc_chart" style="height: 200px;"></div>
     %end
 </article>
 

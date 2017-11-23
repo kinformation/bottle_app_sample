@@ -1,4 +1,10 @@
-$(document).ready(function() {
+/*
+ * app.js
+ * Copyright (c) 2017 HTKエンジニアリング All Rights Reserved.
+ *
+ * Distributed under terms of the MIT license.
+ */
+$(function() {
 
     // ======================
     // ログ出力
@@ -25,11 +31,12 @@ $(document).ready(function() {
             bootstrap: 'danger'
         },
     }
-    const LOG_LEVEL = logger.INFO;
+    var LOG_LEVEL = logger.INFO;
 
     function log(level, msg) {
-        if (LOG_LEVEL.code > level.code) { return; }
-        $("#log_tbody").prepend(
+        // 設定レベル以下のログは出さない
+        if (LOG_LEVEL > level.code) { return; }
+        $('#log_tbody').prepend(
             '<tr class="' + level.bootstrap + '">' +
             '  <td>' + formatDate() + '</td>' +
             '  <td>' + level.name + '</td>' +
@@ -38,7 +45,7 @@ $(document).ready(function() {
         );
     }
 
-    // 日付をフォーマットする
+    // フォーマット済み(YYYY/MM/DD hh:mm:ss)の現在時刻を返却する
     function formatDate() {
         var date = new Date();
         var ret = date.getFullYear() + '/';
@@ -48,7 +55,29 @@ $(document).ready(function() {
         ret = ret + ('0' + date.getMinutes()).slice(-2) + ':';
         ret = ret + ('0' + date.getSeconds()).slice(-2);
         return ret;
-    };
+    }
+
+    // ======================
+    // 設定ファイル読み込み
+    // ======================
+    var gConf;
+
+    function getConfig() {
+        // グローバル変数に反映するため、非同期停止
+        $.ajaxSetup({ async: false });
+        $.getJSON('/config', function(json) {
+            gConf = json;
+        });
+        // 非同期再開
+        $.ajaxSetup({ async: true });
+    }
+    // 設定読み込み
+    getConfig();
+    LOG_LEVEL = gConf['log_level'];
+    log(logger.INFO, '設定ファイルを読み込みました。');
+    for (var key in gConf) {
+        log(logger.DEBUG, key + ':' + gConf[key]);
+    }
 
     // ======================
     // プロットデータ取得
@@ -59,12 +88,12 @@ $(document).ready(function() {
             async: false,
             url: '/data',
             type: 'GET',
-            dataType: 'json',
+            // dataType: 'json',
         }).done(function(data) {
             ret = data;
         });
         return ret;
-    };
+    }
 
     // ======================
     // jqPlot描画
@@ -81,8 +110,8 @@ $(document).ready(function() {
                 label: '気温(℃)'
             }
         },
-    };
-    if (document.getElementById("jp_chart") != null) {
+    }
+    if ($('#jp_chart')[0]) {
         var jqplot = $.jqplot('jp_chart', [], jp_options);
     }
 
@@ -90,6 +119,9 @@ $(document).ready(function() {
     // highcharts描画
     // ======================
     var hc_options = {
+        credits: {
+            enabled: false
+        },
         chart: {
             type: 'line'
         },
@@ -100,8 +132,6 @@ $(document).ready(function() {
             type: 'datetime',
             labels: {
                 format: '{value:%m/%d %k:%M}',
-                rotation: 45,
-                align: 'left'
             }
         },
         yAxis: {
@@ -113,8 +143,8 @@ $(document).ready(function() {
             showInLegend: false,
             data: ajaxDataRenderer()[0]
         }]
-    };
-    if (document.getElementById("hc_chart") != null) {
+    }
+    if ($('#hc_chart')[0]) {
         var highcharts = Highcharts.setOptions({ global: { timezoneOffset: -9 * 60 } });
         highcharts = Highcharts.chart('hc_chart', hc_options);
     }
@@ -125,27 +155,25 @@ $(document).ready(function() {
     function setLastUpdate() {
         $('#last_update').text(formatDate());
     }
-    // ページロード時用
-    $(function() {
-        setLastUpdate();
-    });
+    // ページロード時更新
+    setLastUpdate();
 
     // ======================
     // グラフ自動更新
     // ======================
-    const INTERVAL = 1 * 10 * 1000; //単位はミリ秒
+    const INTERVAL = gConf['interval_sec'] * 1000; //単位はミリ秒
     setInterval(function() {
-        if ($("#auto_reload").prop('checked')) {
+        if ($('#auto_reload').prop('checked')) {
             log(logger.DEBUG, '自動更新がチェックされています。');
 
             // グラフ更新
             var new_data = ajaxDataRenderer();
-            if (document.getElementById("jp_chart") != null) {
+            if (document.getElementById('jp_chart') != null) {
                 var opts = jp_options;
                 opts.data = new_data;
                 opts.clear = true;
                 jqplot.replot(opts);
-            } else if (document.getElementById("hc_chart") != null) {
+            } else if (document.getElementById('hc_chart') != null) {
                 var opts = hc_options;
                 highcharts.destroy()
                 opts.series[0].data = new_data[0];
@@ -170,27 +198,31 @@ $(document).ready(function() {
         var unix_time = str2unixtime($('#start').val());
         var opts = jp_options;
         opts.axes.xaxis.min = unix_time;
-        plot.replot(opts);
+        jqplot.replot(opts);
+        log(logger.INFO, 'グラフの開始時刻を変更しました。');
+        log(logger.DEBUG, '日時 = ' + $('#start').val());
     });
 
     $('#end').change(function() {
         unix_time = str2unixtime($('#end').val());
         var opts = jp_options;
         opts.axes.xaxis.max = unix_time;
-        plot.replot(opts);
+        jqplot.replot(opts);
+        log(logger.INFO, 'グラフの終了時刻を変更しました。');
+        log(logger.DEBUG, '日時 = ' + $('#end').val());
     });
 
-    // YYYY-MM-DDTHH:MM -> UnixTime
+    // 'YYYY-MM-DDTHH:MM' -> UnixTime
     function str2unixtime(str) {
         var date = new Date(str);
         return date.getTime();
-    };
+    }
 
     // ======================
     // 上限・下限アラート
     // ======================
-    const UPPER = 30;
-    const LOWER = 10;
+    const UPPER = gConf['upper_limit'];
+    const LOWER = gConf['lower_limit'];
     var limit_status = 0; // 1:上限超え 0:平常 -1:下限超え
 
     function checkTemperLimit(temp) {

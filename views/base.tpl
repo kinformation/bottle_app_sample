@@ -5,16 +5,18 @@
     <meta charset="utf-8">
     <title>{{title or 'No title'}}</title>
 
+    <!-- jQuery -->
+    <script type="text/javascript" src="lib/jquery-1.9.1.min.js"></script>
+
     <!-- jqplot -->
-    <script type="text/javascript" src="lib/jqPlot/jquery.min.js"></script>
     <script type="text/javascript" src="lib/jqPlot/jquery.jqplot.min.js"></script>
     <script type="text/javascript" src="lib/jqPlot/plugins/jqplot.dateAxisRenderer.js"></script>
     <link rel="stylesheet" type="text/css" href="lib/jqPlot/jquery.jqplot.css" />
 
     <!-- bootstrap -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="lib/bootstrap-3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="lib/bootstrap-3.3.7/css/bootstrap-theme.min.css">
+    <script type="text/javascript" src="lib/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 
     <!-- bootstrap-toggle -->
     <link rel="stylesheet" type="text/css" href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css">
@@ -31,7 +33,12 @@
     % include('navbar.tpl')
 
     <!-- メインコンテンツ -->
-    % include('main.tpl')
+
+    %if get('type') != 'config':
+        % include('main.tpl')
+    %else:
+        % include('config.tpl')
+    %end
 
     <!-- フッター -->
     % include('footer.tpl')
