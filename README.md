@@ -20,10 +20,9 @@ http://<サーバIPアドレス>:8000/
 * `/` : メイン画面（'/jqplot'と同じ)
 * `/jqplot` : jqPlotで温度センサ―データを描画
 * `/highcharts` : Highchartsで温度センサ―データを描画
-* `/data` :DBデータをJSONで返す
-* `/push` :
-  - `@temper=<数値(float)>`: 指定した数値を現在時刻の気温としてDB登録
-  - `@パラメタなし`: ランダム値(0.0～40.0)を現在時刻の気温としてDB登録
+* `/data` : SQLite REST API
+  - `@GET`: DBデータを返す
+　- `@POST`: DBへデータ登録(JSON)
 * `/edit_config` : 設定編集画面
 * `/config` :
   - `@GET`: 設定ファイルの中身を返す

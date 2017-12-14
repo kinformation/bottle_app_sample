@@ -10,7 +10,6 @@ from bottle import *
 from bottle_sqlite import SQLitePlugin
 from datetime import datetime
 import json
-import random
 
 # temperテーブル構造
 #  0|time  |text|0||0
@@ -20,6 +19,9 @@ dbfile = 'data/temper.db'
 install(SQLitePlugin(dbfile=dbfile))
 
 
+# --------------
+# グラフページ
+# --------------
 # jqPlot描画ページ（メインページ）
 @route('/')
 @route('/jqplot')
@@ -33,9 +35,12 @@ def highcharts():
     return template('base', title='テストページ', type='highcharts')
 
 
+# --------------
+# REST API
+# --------------
 # DBデータを返す
-@route('/data')
-def data(db):
+@get('/data')
+def get_data(db):
     data = []
     query = db.execute('SELECT time, temper FROM temper ORDER BY time')
     for row in query:
@@ -46,6 +51,19 @@ def data(db):
     return ret
 
 
+# DBにデータを登録
+@post('/data')
+def post_data(db):
+    data = request.json
+    time = data['time']
+    sensor = data['sensor']
+    temper = data['temper']
+    sql = "INSERT INTO temper (time, sensor, temper) VALUES ('{0}', '{1}', '{2}')".format(
+        time, sensor, temper)
+    db.execute(sql)
+    return ""
+
+
 # 文字列(%Y-%m-%d %H:%M:%S)をUNIX時間に変換
 # Highchartsは文字列を時間に変換できないため。jqPlotだけなら不要。
 def str2ut(str):
@@ -53,24 +71,9 @@ def str2ut(str):
     return d.timestamp() * 1000
 
 
-# DBデータにデータを登録
-# usage: /push?temper=<数値>
-# パラメタなければ、ランダムで入れる
-@route('/push')
-def push(db):
-    time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    sensor = 'myraspi1'
-    temper = request.query.temper
-    try:
-        float(temper)
-    except ValueError:
-        temper = random.uniform(0, 40)
-    sql = "INSERT INTO temper (time, sensor, temper) VALUES ('{0}', '{1}', '{2}')".format(
-        time, sensor, temper)
-    db.execute(sql)
-    return sql
-
-
+# --------------
+# 設定ページ関連
+# --------------
 conffile = 'app.conf'
 
 
@@ -98,6 +101,9 @@ def config_post():
     redirect('/')
 
 
+# --------------
+# 静的コンテンツ
+# --------------
 # Javascript
 @route('/js/<filename>')
 def js_static(filename):
@@ -110,5 +116,7 @@ def lib_static(filepath):
     return static_file(filepath, root='./assets/lib')
 
 
-# サーバ起動
-run(host='0.0.0.0', port=8000, reloader=True)
+if __name__ == '__main__':
+
+    # サーバ起動
+    run(host='0.0.0.0', port=8000, reloader=True)

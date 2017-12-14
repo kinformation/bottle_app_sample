@@ -101,6 +101,9 @@ $(function() {
     var jp_options = {
         title: '温度センサー',
         dataRenderer: ajaxDataRenderer,
+        seriesDefaults: {
+            showMarker: false
+        },
         axes: {
             xaxis: {
                 renderer: $.jqplot.DateAxisRenderer,
