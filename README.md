@@ -1,4 +1,5 @@
 bottle(Python製Webフレームワーク) サンプルAPP
+
 Python 3.5.3で起動確認
 
 # bottleインストール
@@ -22,7 +23,7 @@ http://<サーバIPアドレス>:8000/
 * `/highcharts` : Highchartsで温度センサ―データを描画
 * `/data` : SQLite REST API
   - `@GET`: DBデータを返す
-　- `@POST`: DBへデータ登録(JSON)
+  - `@POST`: DBへデータ登録(JSON)
 * `/edit_config` : 設定編集画面
 * `/config` :
   - `@GET`: 設定ファイルの中身を返す
